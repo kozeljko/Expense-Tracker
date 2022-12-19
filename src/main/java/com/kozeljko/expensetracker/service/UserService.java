@@ -2,6 +2,8 @@ package com.kozeljko.expensetracker.service;
 
 import com.kozeljko.expensetracker.dto.UserDTO;
 import com.kozeljko.expensetracker.entity.User;
+import com.kozeljko.expensetracker.exceptions.EntityAlreadyExistsException;
+import com.kozeljko.expensetracker.exceptions.EntityNotFound;
 import com.kozeljko.expensetracker.mapper.UserMapper;
 import com.kozeljko.expensetracker.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,12 +27,39 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
-    public UserDTO getUserById(Long id) {
-        return userRepository.findById(id).map(userMapper::userToUserDTO).orElse(null);
+    public UserDTO getUserById(Long id) throws EntityNotFound {
+        return userRepository.findById(id).map(userMapper::userToUserDTO).orElseThrow(
+            EntityNotFound::new);
     }
 
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream().map(userMapper::userToUserDTO).toList();
+    }
+
+    public UserDTO createUser(UserDTO userDTO) throws EntityAlreadyExistsException {
+        if (userDTO.getId() != null) {
+            throw new EntityAlreadyExistsException();
+        }
+
+        User user = userMapper.userDTOToUser(userDTO);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        return userMapper.userToUserDTO(userRepository.save(user));
+    }
+
+    public UserDTO updateUser(Long userId, UserDTO userDTO) throws EntityNotFound {
+        var user = userRepository.findById(userId).orElseThrow(EntityNotFound::new);
+        userMapper.updateUserFromUserDTO(userDTO, user);
+
+        return userMapper.userToUserDTO(userRepository.save(user));
+    }
+
+    public UserDTO deleteUser(Long userId) throws EntityNotFound {
+        var user = userRepository.findById(userId).orElseThrow(EntityNotFound::new);
+
+        userRepository.delete(user);
+
+        return userMapper.userToUserDTO(user);
     }
 
     public boolean isAdminInitialized() {

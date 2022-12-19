@@ -1,5 +1,6 @@
 package com.kozeljko.expensetracker.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserDTO {
@@ -7,7 +8,7 @@ public class UserDTO {
     private Long id;
     private String username;
     private String password;
-    private List<String> roles;
+    private List<String> roles = new ArrayList<>();
 
     public UserDTO() {
 
