@@ -10,6 +10,7 @@ public class User {
     private Long id;
     private String username;
     private String password;
+    private String rolesString;
 
     @Id
     @GeneratedValue
@@ -35,5 +36,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getRolesString() {
+        return rolesString;
+    }
+
+    public void setRolesString(String rolesString) {
+        this.rolesString = rolesString;
     }
 }

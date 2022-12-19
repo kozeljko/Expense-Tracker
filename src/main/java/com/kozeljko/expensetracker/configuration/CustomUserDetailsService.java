@@ -1,13 +1,17 @@
 package com.kozeljko.expensetracker.configuration;
 
 import com.kozeljko.expensetracker.repository.UserRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -21,8 +25,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         var user = userRepository.findByUsername(username);
-        return new User(username, user.getPassword(), new HashSet<>());
+        var roles = Arrays.stream(Optional.ofNullable(user.getRolesString()).orElse("").split(","))
+            .filter(Predicate.not(String::isBlank)).map(SimpleGrantedAuthority::new)
+            .collect(Collectors.toSet());
+        return new User(username, user.getPassword(), roles);
     }
-
-
 }

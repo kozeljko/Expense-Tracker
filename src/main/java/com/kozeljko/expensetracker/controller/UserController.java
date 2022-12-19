@@ -25,6 +25,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    /**
+     * TODO This should be probably moved to a bean initializing the user when application first starts up.
+     *
+     * @return created admin
+     */
     @PostMapping(path = "/init-admin")
     public ResponseEntity<User> initializeAdmin() {
         if (userService.isAdminInitialized()) {
