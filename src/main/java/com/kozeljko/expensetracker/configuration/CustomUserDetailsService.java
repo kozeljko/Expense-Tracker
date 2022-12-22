@@ -8,8 +8,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -25,7 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         var user = userRepository.findByUsername(username);
-        var roles = Arrays.stream(Optional.ofNullable(user.getRolesString()).orElse("").split(","))
+        var roles = user.getRoles().stream()
             .filter(Predicate.not(String::isBlank)).map(SimpleGrantedAuthority::new)
             .collect(Collectors.toSet());
         return new User(username, user.getPassword(), roles);
